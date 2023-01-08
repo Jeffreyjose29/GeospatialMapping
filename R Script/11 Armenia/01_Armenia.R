@@ -14,24 +14,24 @@ invisible(lapply(packages, library, character.only = TRUE))
 
 
 # Set directory
-setwd("C:/Users/jeffr/OneDrive/Desktop/Github Activities/PopulationDensityMapper/Data")
+setwd("C:/Users/jeffr/OneDrive/Desktop/Data")
 
 # Read geo_package - Kontur data
-UnitedArabEmirates <- st_read("kontur_population_AE_20220630.gpkg")
+armenia <- st_read("kontur_population_AM_20220630.gpkg")
 
 
 ## define aspect ratio based on bounding box
-bb <- st_bbox(UnitedArabEmirates) 
+bb <- st_bbox(armenia) 
 bottom_left <- st_point(c(bb[["xmin"]], bb[["ymin"]])) |>
-  st_sfc(crs = st_crs(UnitedArabEmirates))
+  st_sfc(crs = st_crs(armenia))
 
 bottom_right <- st_point(c(bb[["xmax"]], bb[["ymin"]])) |>
-  st_sfc(crs = st_crs(UnitedArabEmirates))
+  st_sfc(crs = st_crs(armenia))
 
 
 width <- st_distance(bottom_left, bottom_right)
 top_left <- st_point(c(bb[["xmin"]], bb[["ymax"]])) |>
-  st_sfc(crs = st_crs(UnitedArabEmirates))
+  st_sfc(crs = st_crs(armenia))
 height <- st_distance(bottom_left, top_left)
 
 
@@ -47,22 +47,18 @@ if(width > height) {
 # Convert to raster so we can then convert to matrix
 size <- 5000
 
-UnitedArabEmirates_rast <- st_rasterize(UnitedArabEmirates, nx = floor(size * w_ratio), ny = floor(size * h_ratio))
+armenia_rast <- st_rasterize(armenia, nx = floor(size * 0.99), ny = floor(size * h_ratio))
 
-mat <- matrix(UnitedArabEmirates_rast$population, nrow = floor(size * w_ratio), ncol = floor(size * h_ratio))
+mat <- matrix(armenia_rast$population, nrow = floor(size * 0.99), ncol = floor(size * h_ratio))
 
 # Create colour pallete
-c1 <- c(#rgb(251,240,236, max = 255), rgb(222,218,225, max = 255), 
-        #rgb(192,190,216, max = 255),
-        #rgb(170,173,209, max = 255),
-        rgb(118,113,154, max = 255),
-        rgb(84,77,109, max = 255),
-        rgb(191,164,199, max = 255),
-        rgb(211,154,200, max = 255),
-        rgb(205,115,175, max = 255),
-        rgb(94,38,84, max = 255),
-        rgb(50,37,57, max = 255)
-        )
+c1 <- c(
+  rgb(240, 235, 216, max = 255),
+  rgb(116, 140, 171, max = 255),
+  rgb(62, 92, 118, max = 255),
+  rgb(29, 45, 68, max = 255),
+  rgb(13, 19, 33, max = 255)
+)
 
 swatchplot(c1)
 
@@ -75,7 +71,7 @@ rgl::rgl.close()
 mat |>
   height_shade(texture = texture) |>
   plot_3d(heightmap = mat,
-          zscale = 100 / 5,
+          zscale = 100/5,
           solid = FALSE,
           shadow = TRUE,
           shadowdepth = 5,
@@ -83,14 +79,14 @@ mat |>
           soil = TRUE,
           background = rgb(253, 244, 239, max = 255))
 
-render_camera(theta = 0, phi = 60, zoom = 0.7)
+render_camera(theta = 5, phi = 30, zoom = 0.7)
 
-outfile <- "C:/Users/jeffr/OneDrive/Desktop/Github Activities/PopulationDensityMapper/Renders/UnitedArabEmirates.png"
+outfile <- "C:/Users/jeffr/OneDrive/Desktop/Renders/Armenia.png"
 
 render_highquality(
   filename = outfile,
   interactive = FALSE,
-  lightdirection = 300,
+  lightdirection = 20,
   lightaltitude = c(45, 80),
   lightcolor = c(c1[2], "white"),
   lightintensity = c(600, 400),
